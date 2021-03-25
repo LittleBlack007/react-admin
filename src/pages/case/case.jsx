@@ -6,13 +6,12 @@ import '../../config/index.less';
 const dataSource = [
     {
       id: '1',
-      userName: '王晓红',
-      userPetName:'wangixoahong',
-      userPwd:'wangxiaohong',
-      userSex:'男',
-      userStatus:1,
-      userPhone:'13232762562',
-      userImg: 'http://www.jituwang.com/uploads/allimg/160226/257934-160226225P747.jpg',
+      caseTitle: '世纪花园',
+      caseBudget: 32,
+      caseArea:123,
+      staffId:1,
+      CasePosition:1,
+      caseIndexImg: 'http://www.jituwang.com/uploads/allimg/160226/257934-160226225P747.jpg',
     },
 ]
 const columns = [
@@ -20,42 +19,39 @@ const columns = [
         title:'id',
         dataIndex:'id',
         key:'id',
+        className:'noShow'
     },
     {
-      title: '用户账号',
-      dataIndex: 'userPetName',
-      key: 'userPetName',
+      title: '标题',
+      dataIndex: 'caseTitle',
+      key: 'caseTitle',
     },
     {
-        title: '姓名',
-        dataIndex: 'userName',
-        key: 'userPetName'
-      },
-    {
-      title: '密码',
-      dataIndex: 'userPwd',
-      key: 'userPwd',
+      title: '建成预算￥',
+      dataIndex: 'caseBudget',
+      key: 'caseBudget',
     },
     {
-        title: '性别',
-        dataIndex: 'userSex',
-        key: 'userSex',
+        title: '面积',
+        dataIndex: 'caseArea',
+        key: 'caseArea',
+        render: text => (<span>{text}m<sup>2</sup></span>)
     },
     {
-        title: '电话',
-        dataIndex: 'userPhone',
-        key: 'userPhone',
+        title: '设计者id',
+        dataIndex: 'staffId',
+        key: 'staffId',
     },
     {
-        title: '是否激活',
-        dataIndex: 'userStatus',
+        title: '是否置顶',
+        dataIndex: 'casePosition',
         key: 'casePosition',
-        render: (text) => (<Switch checkedChildren="是" unCheckedChildren="否" defaultChecked={text===1} />)
+        render: (text) => (<Switch checkedChildren="置顶" unCheckedChildren="不置顶" defaultChecked={text===1} />)
     },
     {
-        title: '头像',
-        dataIndex: 'userImg',
-        key: 'userImg',
+        title: '案例封面',
+        dataIndex: 'caseIndexImg',
+        key: 'caseIndexImg',
         render: text => <Image src={text} width='100px' />
     },
     {
@@ -67,7 +63,7 @@ const columns = [
         ])
     },
 ]
-class Company extends React.Component {
+class Case extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -97,4 +93,4 @@ class Company extends React.Component {
         )
     }
 }
-export default Company;
+export default Case;

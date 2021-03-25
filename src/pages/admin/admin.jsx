@@ -6,13 +6,12 @@ import memoryUtils from '../../utils/memoryUtils';
 import LeftNav from '../../components/left-nav';
 import Header from '../../components/header';
 import Home from '../home/home' ;
-import Category from '../category/category'; 
-import Product from '../product/product';
-import Role from '../role/role';
 import User from '../user/user' ;
-import Bar from '../charts/bar' ;
-import Pie from '../charts/pie';
-import Line from '../charts/line'
+import Advertisement from '../advertisement'
+import Case from '../case';
+import Company from '../company';
+import Order from '../order';
+import Comment from '../comment';
 
 const {Content, Footer, Sider } = Layout;
 
@@ -26,7 +25,7 @@ class Admin extends Component {
 
     render() {
         const user = memoryUtils.user;
-        if(!user._id){
+        if(!user.id){
             return <Redirect to='/login'/>
         }
         return(
@@ -40,14 +39,13 @@ class Admin extends Component {
                     </Header>
                     <Content style={{backgroundColor:"#fff", margin: '20px 20px 0'}}>
                         <Switch>
+                        <Route path="/page/comment" component={Comment} />
+                        <Route path="/page/order" component={Order} />
+                            <Route path="/page/company" component={Company} />
+                            <Route path="/page/case" component={Case} />
+                            <Route path="/page/advertisement" component={Advertisement} />
                             <Route path='/page/user' component={User} />
                             <Route path='/page/home' component={Home} />
-                            <Route path='/page/charts/bar' component={Bar} />
-                            <Route path='/page/charts/line' component={Line} />
-                            <Route path='/page/charts/pie' component={Pie} />
-                            <Route path='/page/role' component={Role} />
-                            <Route path='/page/products' component={Product} />
-                            <Route path='/page/category' component={Category} />
                             <Redirect to='/page/home' />
                         </Switch>
                     </Content>

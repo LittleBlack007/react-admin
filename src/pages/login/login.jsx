@@ -4,7 +4,7 @@ import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './login.less'
 import logo from "../../assets/images/logo.jpg";
-import {reqLogin} from '../../api/index'
+import {login} from '../../api/index'
 import memoryUtils from '../../utils/memoryUtils'
 import storageUtils from '../../utils/storageUtils'
 
@@ -17,9 +17,9 @@ class Login extends Component{
     }
 
     formOnFinish = async values => {
-        const result = await reqLogin(values);
-        console.log(result);
-        if(result.data.status === 0){
+        
+        const result = await login(values.username,values.password);
+        if(result.data.status === 'success'){
             //提示登录成功
             message.success('登录成功',2);
             storageUtils.saveUser(result.data.data);//保存用户信息localStroage
@@ -34,14 +34,14 @@ class Login extends Component{
 
     render() {
         //如果用户已经登录，自动跳转到admin
-        if(memoryUtils.user && memoryUtils.user._id){
+        if(memoryUtils.user && memoryUtils.user.id){
             return <Redirect to='/' />;
         }
         return (
             <div className='login'>
                 <header className='login-header'>
                     <img src={logo} alt='logo' />
-                    <h1>React-balabala后台管理系统</h1>
+                    <h1>巴拉巴拉后台管理系统</h1>
                 </header>
                 <section className='login-content'>
                     <h3>用户登录</h3>

@@ -9519,6 +9519,13 @@ react-app-rewired@^2.1.7:
   dependencies:
     semver "^5.6.0"
 
+react-city-select@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npm.taobao.org/react-city-select/download/react-city-select-1.0.2.tgz#2bc457b2c4ca2d8f233c94e4d54650211fe3aa0e"
+  integrity sha1-K8RXssTKLY8jPJTk1UZQIR/jqg4=
+  dependencies:
+    prop-types "^15.6.2"
+
 react-dev-utils@^11.0.1:
   version "11.0.1"
   resolved "https://registry.npm.taobao.org/react-dev-utils/download/react-dev-utils-11.0.1.tgz?cache=0&sync_timestamp=1606109654281&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Freact-dev-utils%2Fdownload%2Freact-dev-utils-11.0.1.tgz#30106c2055acfd6b047d2dc478a85c356e66fe45"

@@ -8,7 +8,7 @@ import storageUtils from './utils/storageUtils'
 
 //当点击页面刷新时，把localStroage的用户信息保存到内存中，维持登录状态
 const user = storageUtils.getUser();
-if(user && user._id){
+if(user && user.id){
     memoryUtils.user = user
 }
 

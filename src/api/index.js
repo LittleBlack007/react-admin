@@ -8,7 +8,37 @@ import ajax from './ajax';
 import jsonp from 'jsonp';
 
 //登录
-export const reqLogin = user => ajax("/api/login",user,'POST')
+// export const reqLogin = user => ajax("/api/login",user,'POST')
+
+//登录
+export const login = (name,password) => ajax("/admin/login",{adminName:name,adminPwd:password},"POST")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //天气查询
 export function reqWeather(city){

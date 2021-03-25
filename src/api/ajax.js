@@ -11,14 +11,16 @@
 import axios from 'axios';
 import { message } from 'antd';
 
+const api = "http://localhost:8080"
+
 export default function ajax(url, data={}, method = "GET") {
     return new Promise(function(resolve, reject){
         let promise;
         //执行异步ajax请求
         if(method === "GET"){
-            promise = axios.get(url, {params:data});
+            promise = axios.get(api+url, {params:data});
         }else{
-            promise = axios.post(url, data);
+            promise = axios.post(api+url, data);
         }
         promise.then(response => {//这里定义axios封装的promise对象的resolve(response)
             //成功了执行最外层的resolve(response)
