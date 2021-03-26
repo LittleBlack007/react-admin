@@ -12,6 +12,10 @@ import Case from '../case';
 import Company from '../company';
 import Order from '../order';
 import Comment from '../comment';
+import Rate from '../rate';
+import Staff from '../staff';
+import Kind from '../kind';
+import Post from '../post';
 
 const {Content, Footer, Sider } = Layout;
 
@@ -29,7 +33,7 @@ class Admin extends Component {
             return <Redirect to='/login'/>
         }
         return(
-            <Layout style={{height:'100%'}}>
+            <Layout >
                 <Sider>
                     <LeftNav />
                 </Sider>
@@ -39,6 +43,10 @@ class Admin extends Component {
                     </Header>
                     <Content style={{backgroundColor:"#fff", margin: '20px 20px 0'}}>
                         <Switch>
+                        <Route path="/page/post" component={Post} />
+                        <Route path="/page/kind" component={Kind} />
+                        <Route path="/page/staff" component={Staff} />
+                        <Route path="/page/rate" component={Rate} />
                         <Route path="/page/comment" component={Comment} />
                         <Route path="/page/order" component={Order} />
                             <Route path="/page/company" component={Company} />

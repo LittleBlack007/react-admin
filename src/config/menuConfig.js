@@ -48,7 +48,7 @@ const menuList = [
     },
     { 
         title: '评价管理', 
-        key: '/page/comment', 
+        key: '/page/rate', 
         icon: <AreaChartOutlined /> 
     },
     { 
@@ -63,12 +63,12 @@ const menuList = [
     },
     { 
         title: '帖子管理', 
-        key: '/page/forum/post', 
+        key: '/page/post', 
         icon: <BarChartOutlined /> 
     },
     { 
         title: '评论管理', 
-        key: '/page/forum/comment', 
+        key: '/page/comment', 
         icon: <PieChartOutlined /> 
     },
     
