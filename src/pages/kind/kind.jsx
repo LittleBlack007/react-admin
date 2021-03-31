@@ -1,7 +1,9 @@
 import React from 'react';
-import {Card,Table,Button} from 'antd';
+import {Card,Table,Button,message,Modal} from 'antd';
 import NewKind from './new-kind';
+import {getKind,deleteKind} from '../../api/index';
 
+const {confirm} = Modal
 
 const dataSource = [
     {
@@ -29,9 +31,26 @@ const columns = [
         dataIndex: 'operate',
         key: 'operate',
         render: (text,record) => ([
-            <NewKind kindId = {record.id} type='添加'/>,
-            <NewKind kindId = {record.id} type='编辑'/>,
-            <Button type='link' >删除</Button>
+            <NewKind data={record} type='编辑'/>,
+            <Button type='link'onClick={() => {
+                confirm({
+                    okText:'确定',
+                    cancelText:'取消',
+                    content: '确定删除？',
+                    async onOk() {
+                        const result = await deleteKind(record.id);
+                        if(result.data && result.data.data === 1){
+                            message.success('删除成功');
+                            window.location.reload();
+                        }
+                    },
+                    onCancel() {
+                      //console.log('Cancel');
+                    },
+                  });
+            }} >
+                删除
+            </Button>
         ])
     },
 ]
@@ -48,18 +67,28 @@ class kind extends React.Component {
     }
 
     async componentDidMount(){
-
+        const result = await getKind();
+        this.setState({data:result.data.data})
     }
 
     render() {
         return (
-            <Card>
+            <Card extra={<NewKind type='添加'/>}>
                 <Table
                     rowKey={(record) => {
                         return (record.id || record.id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getKind(value);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )

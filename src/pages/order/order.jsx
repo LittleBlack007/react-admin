@@ -1,7 +1,11 @@
 import React from 'react';
-import {Card,Table,Tooltip,Button, Image} from 'antd';
+import {Card,Table,Tooltip,Button, message, Modal, Select} from 'antd';
 import '../../config/index.less';
+import {getOrder,deleteOrder} from '../../api/index';
+import moment from 'moment';
 
+const {confirm} = Modal;
+const {Option} = Select;
 
 const dataSource = [
     {
@@ -58,12 +62,13 @@ const columns = [
         title: '创建时间',
         dataIndex: 'orderCreateTime',
         key: 'orderCreateTime',
+        render: text => moment(text).format("YYYY-MM-DD HH:mm:ss")
     },
     {
         title: '类型',
         dataIndex: 'orderType',
         key: 'orderType',
-        render: text => text===0?'设计':'施工'
+        //render: text => text===0?'设计':'施工'
     },
     {
         title: '评价',
@@ -97,9 +102,26 @@ const columns = [
         title: '操作',
         dataIndex: 'operate',
         key: 'operate',
-        render: (record) => ([
-            <Button type='link' >编辑</Button>,
-            <Button type='link' >删除</Button>
+        render: (text,record) => ([
+            <Button type='link'onClick={() => {
+                confirm({
+                    okText:'确定',
+                    cancelText:'取消',
+                    content: '确定删除？',
+                    async onOk() {
+                        const result = await deleteOrder(record.id);
+                        if(result.data && result.data.data === 1){
+                            message.success('删除成功');
+                            window.location.reload();
+                        }
+                    },
+                    onCancel() {
+                      //console.log('Cancel');
+                    },
+                  });
+            }} >
+                删除
+            </Button>
         ])
     },
 ]
@@ -107,7 +129,9 @@ class Order extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data:[]
+            data:[],
+            type:'',
+            status:'',
         };
     }
 
@@ -116,18 +140,53 @@ class Order extends React.Component {
     }
 
     async componentDidMount(){
+        const result = await getOrder();
+        this.setState({data:result.data.data})
+    }
 
+    onChange = async value => {
+        this.setState({type:value})
+        const result = await getOrder(1,value,this.state.status);
+        this.setState({data:result.data.data})
+    }
+
+    onStatusChange = async value => {
+        this.setState({status:value})
+        const result = await getOrder(1,this.state.status,value);
+        this.setState({data:result.data.data})
     }
 
     render() {
         return (
-            <Card>
+            <Card 
+                extra={[
+                    '订单类型：',<Select placeholder='全部' onChange={this.onChange}>
+                        <Option value=''>全部</Option>
+                        <Option value='施工'>施工</Option>
+                        <Option value='设计'>设计</Option>
+                    </Select>,' ',
+                    '订单状态：',<Select placeholder='全部' onChange={this.onStatusChange}>
+                        <Option value=''>全部</Option>
+                        <Option value='0'>准备中</Option>
+                        <Option value='1'>进行中</Option>
+                        <Option value='2'>已完成</Option>
+                    </Select>
+                ]}>
                 <Table
                     rowKey={(record) => {
-                        return (record.order_id || record.dorder_id + Date.now()) //在这里加上一个时间戳就可以了
+                        return (record.id || record.id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getOrder(value,this.state.type,this.state.status);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )

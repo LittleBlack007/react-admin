@@ -1,16 +1,33 @@
 import React from 'react';
-import {Card,Table,Switch,Button, Image} from 'antd';
+import {Card,Table,Switch,Button, Image, message,Modal} from 'antd';
 import './index.less';
+import {getAdvertisements,updateAdvertisement,deleteAdvertisement} from '../../api/index'
 import NewAdvertisement from './new-advertisement';
+import huo1 from '../../assets/images/huodong1.jpg'
+import huo2 from '../../assets/images/huodong2.jpg'
+import huo3 from '../../assets/images/huodong3.jpg'
 
-
+const { confirm } = Modal;
 const dataSource = [
     {
       id: '1',
-      adTitle: '胡彦斌',
-      adUrl: 32,
-      adPicture: 'http://www.jituwang.com/uploads/allimg/160226/257934-160226225P747.jpg',
+      adTitle: '活动1',
+      adUrl: 'meituan.com',
+      adPicture: huo1,
     },
+    {
+        id: '2',
+        adTitle: '活动2',
+        adUrl: 'aiqiyi.com',
+        adPicture: huo2,
+      },
+      {
+        id: '3',
+        adTitle: '活动3',
+        adUrl: 'taobao.com',
+        adPicture: huo3,
+      },
+    
 ]
 const columns = [
     {
@@ -37,17 +54,47 @@ const columns = [
     },
     {
         title: '是否投放',
-        dataIndex: 'adLaunch',
-        key: 'adLaunch',
-        render: () => (<Switch checkedChildren="投放" unCheckedChildren="撤回" defaultChecked />)
+        dataIndex: 'adStatus',
+        key: 'adStatus',
+        render: (text,row) => (
+            <Switch 
+                checkedChildren="投放" unCheckedChildren="撤回" defaultChecked={text === 1}  
+                onChange={async (value)=> {
+                    let status = value === true?1:0;
+                    row.adStatus = status;
+                    const result = await updateAdvertisement(row);
+                    if(result.data && result.data.data === 1){
+                        message.success('成功')
+                    }
+                }}
+            />
+        )
     },
     {
         title: '操作',
         dataIndex: 'operate',
         key: 'operate',
-        render: (record) => ([
-            <NewAdvertisement />,
-            <Button type='link' >删除</Button>
+        render: (text,record) => ([
+            <NewAdvertisement data={record} type='更新'/>,
+            <Button type='link'onClick={() => {
+                confirm({
+                    okText:'确定',
+                    cancelText:'取消',
+                    content: '确定删除？',
+                    async onOk() {
+                        const result = await deleteAdvertisement(record.id);
+                        if(result.data && result.data.data === 1){
+                            message.success('删除成功');
+                            window.location.reload();
+                        }
+                    },
+                    onCancel() {
+                      //console.log('Cancel');
+                    },
+                  });
+            }} >
+                删除
+            </Button>
         ])
     },
 ]
@@ -55,7 +102,7 @@ class Advertisement extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data:[]
+            data:{list:[]}
         };
     }
 
@@ -64,18 +111,28 @@ class Advertisement extends React.Component {
     }
 
     async componentDidMount(){
-
+        const result = await getAdvertisements();
+        this.setState({data:result.data.data})
     }
 
     render() {
         return (
-            <Card>
+            <Card extra={<NewAdvertisement type='添加' />} >
                 <Table
-                    rowKey={(record) => {
+                    rowKey={(text,record) => {
                         return (record.id || record.id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getAdvertisements(value);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )

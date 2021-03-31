@@ -1,7 +1,9 @@
 import React from 'react';
-import {Card,Table,Switch,Button, Image} from 'antd';
+import {Card,Table,Switch,Button, Image, message, Modal,Input} from 'antd';
 import '../../config/index.less';
+import {getUser,deleteUser,updateUser} from '../../api/index'
 
+const {confirm} = Modal;
 
 const dataSource = [
     {
@@ -50,7 +52,19 @@ const columns = [
         title: '是否激活',
         dataIndex: 'userStatus',
         key: 'casePosition',
-        render: (text) => (<Switch checkedChildren="是" unCheckedChildren="否" defaultChecked={text===1} />)
+        render: (text,row) => (
+            <Switch 
+                checkedChildren="激活" unCheckedChildren="拉黑" defaultChecked={text === 1}  
+                onChange={async (value)=> {
+                    let status = value === true?1:0;
+                    row.userStatus = status;
+                    const result = await updateUser(row);
+                    if(result.data && result.data.data === 1){
+                        message.success('成功')
+                    }
+                }}
+            />
+        )
     },
     {
         title: '头像',
@@ -62,8 +76,26 @@ const columns = [
         title: '操作',
         dataIndex: 'operate',
         key: 'operate',
-        render: (record) => ([
-            <Button type='link' >删除</Button>
+        render: (text,record) => ([
+            <Button type='link'onClick={() => {
+                confirm({
+                    okText:'确定',
+                    cancelText:'取消',
+                    content: '确定删除？',
+                    async onOk() {
+                        const result = await deleteUser(record.id);
+                        if(result.data && result.data.data === 1){
+                            message.success('删除成功');
+                            window.location.reload();
+                        }
+                    },
+                    onCancel() {
+                      //console.log('Cancel');
+                    },
+                  });
+            }} >
+                删除
+            </Button>
         ])
     },
 ]
@@ -80,18 +112,33 @@ class Company extends React.Component {
     }
 
     async componentDidMount(){
+        const result = await getUser();
+        this.setState({data:result.data.data});
+    }
 
+    onSearch = async value =>{
+        const result = await getUser(1,value);
+        this.setState({data:result.data.data});
     }
 
     render() {
         return (
-            <Card>
+            <Card extra={<Input.Search placeholder="输入名字" onSearch={this.onSearch} enterButton />}>
                 <Table
                     rowKey={(record) => {
-                        return (record.order_id || record.dorder_id + Date.now()) //在这里加上一个时间戳就可以了
+                        return (record.id || record.id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getUser(value);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )

@@ -1,7 +1,9 @@
 import React from 'react';
-import {Card,Table,Switch,Button, Image} from 'antd';
+import {Card,Table,Switch,Button, Image, message,Input,Modal} from 'antd';
 import '../../config/index.less';
+import {getStaff,deleteStaff,updateStaff} from '../../api/index';
 
+const {confirm} = Modal;
 
 const dataSource = [
     {
@@ -27,6 +29,11 @@ const columns = [
         // className:'noShow'
     },
     {
+        title: '所属公司id',
+        dataIndex: 'companyId',
+        key: 'companyId',
+    },
+    {
         title: '头像',
         dataIndex: 'staffImg',
         key: 'staffImg',
@@ -41,16 +48,19 @@ const columns = [
       title: '账户名',
       dataIndex: 'staffPetName',
       key: 'staffPetName',
+      ellipsis:true,
     },
     {
       title: '密码',
       dataIndex: 'staffPwd',
       key: 'staffPwd',
+      ellipsis:true,
     },
     {
         title: '电话',
         dataIndex: 'staffPhone',
         key: 'staffPhone',
+        ellipsis:true,
     },
     {
         title: '工种',
@@ -58,19 +68,16 @@ const columns = [
         key: 'kindId',
     },
     {
-        title: '所属公司id',
-        dataIndex: 'companyId',
-        key: 'companyId',
-    },
-    {
         title:'入驻时间',
         dataIndex:'staffStart',
-        key:'staffStart'
+        key:'staffStart',
+        ellipsis:true,
     },
     {
         title: '个人简介',
         dataIndex: 'staffProfile',
         key: 'staffProfile',
+        ellipsis:true,
     },
     {
         title: '详细地址',
@@ -82,14 +89,44 @@ const columns = [
         title: '状态',
         dataIndex: 'staffStatus',
         key: 'staffStatus',
-        render: (text) => (<Switch checkedChildren="激活" unCheckedChildren="封禁" defaultChecked={text===1} />)
+        render: (text,row) => (
+            <Switch 
+                checkedChildren="激活" unCheckedChildren="拉黑" defaultChecked={text === 1}  
+                onChange={async (value)=> {
+                    let status = value === true?1:0;
+                    row.staffStatus = status;
+                    const result = await updateStaff(row);
+                    if(result.data && result.data.data === 1){
+                        message.success('成功')
+                    }
+                }}
+            />
+        )
     },
     {
         title: '操作',
         dataIndex: 'operate',
         key: 'operate',
-        render: (record) => ([
-            <Button type='link' >删除</Button>
+        render: (text,record) => ([
+            <Button type='link'onClick={() => {
+                confirm({
+                    okText:'确定',
+                    cancelText:'取消',
+                    content: '确定删除？',
+                    async onOk() {
+                        const result = await deleteStaff(record.id);
+                        if(result.data && result.data.data === 1){
+                            message.success('删除成功');
+                            window.location.reload();
+                        }
+                    },
+                    onCancel() {
+                      //console.log('Cancel');
+                    },
+                  });
+            }} >
+                删除
+            </Button>
         ])
     },
 ]
@@ -97,7 +134,9 @@ class Staff extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data:[]
+            data:[],
+            name:'',
+            kindId:null
         };
     }
 
@@ -106,18 +145,38 @@ class Staff extends React.Component {
     }
 
     async componentDidMount(){
+        const result = await getStaff(1);
+        this.setState({data:result.data.data});
+    }
+    
+    onSearch = async value => {
+        const result = await getStaff(1,value,this.state.kindId);
+        this.setState({name:value,data:result.data.data});
+    }
 
+    onChange = async value => {
+        const result = await getStaff(1,this.state.name,value);
+        this.setState({kindId:value,data:result.data.data});
     }
 
     render() {
         return (
-            <Card>
+            <Card extra={<Input.Search placeholder="输入员工名字" onSearch={this.onSearch} enterButton />}>
                 <Table
                     rowKey={(record) => {
                         return (record.order_id || record.dorder_id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getStaff(value,this.state.name,this.state.kindId);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )

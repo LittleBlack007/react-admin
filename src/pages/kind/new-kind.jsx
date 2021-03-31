@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Form, Input, Button } from 'antd';
+import { Modal, Form, Input, Button,message } from 'antd';
+import {addKind,updateKind} from '../../api/index'
 
 const formItemLayout = {
     labelCol: {
@@ -45,8 +46,21 @@ class NewKind extends React.Component {
         this.setState({ modalVisible: false })
     };
 
-    onFinish = (values) => {
-        
+    onFinish = async (values) => {
+        if(this.props.type === "添加"){
+            const result = await addKind(values)
+            if(result.data && result.data.data === 1){
+                message.success('添加成功');
+                window.location.reload();
+            }
+        }else{
+            values.id = this.props.data.id
+            const result = await updateKind(values)
+            if(result.data && result.data.data === 1){
+                message.success('成功');
+                window.location.reload();
+            }
+        }
     };
 
     componentDidMount() {
@@ -65,12 +79,12 @@ class NewKind extends React.Component {
                         ref={this.formRef}
                         name="new_rated"
                         onFinish={this.onFinish}
-                        // initialValues={
+                        initialValues={this.props.data}
                         scrollToFirstError
                     >
                         <Form.Item
                             label='职业'
-                            name='KindName'
+                            name='kindName'
                         >
                             <Input />
                         </Form.Item>

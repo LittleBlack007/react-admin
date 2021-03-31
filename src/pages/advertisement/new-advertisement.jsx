@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Form, Input, Button, Upload } from 'antd';
+import { Modal, Form, Input, Button, Upload ,message} from 'antd';
+import {addAdvertisement,updateAdvertisement} from '../../api/index'
 
 const formItemLayout = {
     labelCol: {
@@ -28,6 +29,7 @@ class NewAdvertisement extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            imgStatus:null,
             modalVisible: false,
             picUrl:'',
         };
@@ -46,11 +48,33 @@ class NewAdvertisement extends React.Component {
         this.setState({ modalVisible: false })
     };
 
-    onFinish = (values) => {
-        values.adPicture = this.state.picUrl;
+    onFinish = async(values) => {
+        if(this.props.type === '添加'){
+            values.adPicture = this.state.picUrl;
+            values.adStatus = 1;
+            const result = await addAdvertisement(values);
+            if(result.data && result.data.data === 1){
+                message.success('添加成功');
+                window.location.reload();
+            }
+        }else{
+            values.id = this.props.data.id
+            values.adPicture = this.state.picUrl;
+            const result = await updateAdvertisement(values);
+            if(result.data && result.data.data === 1){
+                message.success('更新成功');
+                window.location.reload();
+            }
+        }
+        
     };
 
     componentDidMount() {
+        let t = this.props.data?true:false;
+        this.setState({imgStatus:t})
+        if(t){
+            this.setState({picUrl:this.props.data.adPicture})
+        }
     }
 
     render() {
@@ -58,10 +82,11 @@ class NewAdvertisement extends React.Component {
         return (
             <>
                 <Button type="link" onClick={this.showModal} disabled={this.props.disabled}>
-                    添加
+                    {this.props.type}
                 </Button>
                 <Modal title="广告" visible={modalVisible} onCancel={this.handleCancel} footer={null} width={'70%'}>
                     <Form
+                        initialValues={this.props.data}
                         {...formItemLayout}
                         ref={this.formRef}
                         name="new_rated"
@@ -96,19 +121,19 @@ class NewAdvertisement extends React.Component {
                                     if (file.status === "done") {
                                         if (file.response.status === 'success') {
                                             const { data } = file.response;
-                                            this.setState({ picUrl: data })
+                                            this.setState({ picUrl: data,imgStatus:false })
                                         }
                                     }
                                 }}
                                 showUploadList={true}
                             >
-                                +上传照片    
+                                {this.state.imgStatus?<img src={this.props.data.adPicture} style={{width:'100px',height:'100px'}} />:'+上传照片'}
                             </Upload>
                         </Form.Item>
                         
                         <Form.Item {...tailFormItemLayout}>
                             <Button type="primary" htmlType="submit">
-                                确定添加
+                                确定
                             </Button>
                         </Form.Item>
                     </Form>

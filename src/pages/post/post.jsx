@@ -1,7 +1,10 @@
 import React from 'react';
-import {Card,Table,Switch,Button, Image} from 'antd';
+import {Card,Table,Switch,Button, Image, message,Modal,Select,Input} from 'antd';
 import '../../config/index.less';
+import {getPostAndUserByTNT} from '../../api/index';
+import moment from 'moment';
 
+const {comfirm} = Modal;
 
 const dataSource = [
     {
@@ -24,43 +27,39 @@ const columns = [
     },
     {
         title: '标题',
-        dataIndex: 'postTitle',
+        dataIndex: 'post_title',
         key: 'postTitle',
+        ellipsis:true
     },
     {
         title: '分类',
-        dataIndex: 'typeId',
+        dataIndex: 'post_type_id',
         key: 'typeId',
     },
     {
-      title: '内容',
-      dataIndex: 'postContent',
-      key: 'postContent',
-      ellipsis:true
-    },
-    {
       title: '收藏数',
-      dataIndex: 'postComNum',
+      dataIndex: 'post_com_num',
       key: 'postComNum',
     },
     {
         title: '点赞数',
-        dataIndex: 'postLikesNum',
+        dataIndex: 'post_likes_num',
         key: 'postLikesNum',
     },
     {
         title: '浏览量',
-        dataIndex: 'postViewed',
+        dataIndex: 'post_viewed',
         key: 'postViewed',
     },
     {
         title: '创建时间',
-        dataIndex: 'postLastDate',
+        dataIndex: 'post_last_date',
         key: 'postLastDate',
+        render: text => moment(text).format("YYYY-MM-DD HH:mm:ss")
     },
     {
         title: '置顶',
-        dataIndex: 'postStatus',
+        dataIndex: 'post_status',
         key: 'postStatus',
         render: (text) => (<Switch checkedChildren="置顶" unCheckedChildren="不置顶" defaultChecked={text===1} />)
     },
@@ -77,7 +76,10 @@ class Post extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data:[]
+            data:[],
+            userName:'',
+            typeId:null,
+            postTitle:'',
         };
     }
 
@@ -86,10 +88,12 @@ class Post extends React.Component {
     }
 
     async componentDidMount(){
-
+        const result = await getPostAndUserByTNT();
+        this.setState({data:result.data.data})
     }
 
     render() {
+        const {typeId,postTitle,userName} = this.state;
         return (
             <Card>
                 <Table
@@ -97,7 +101,16 @@ class Post extends React.Component {
                         return (record.order_id || record.dorder_id + Date.now()) //在这里加上一个时间戳就可以了
                     }}
                     columns={columns}
-                    dataSource={dataSource}
+                    dataSource={this.state.data.list}
+                    pagination={{
+                        pageSize:this.state.data.pageSize,
+                        pageNum:this.state.data.pageNum,
+                        total:this.state.data.total,
+                        onChange:async (value) => {
+                            const result = await getPostAndUserByTNT(value,typeId,userName,postTitle);
+                            this.setState({data:result.data.data})
+                        }
+                    }}
                 />
             </Card>
         )
